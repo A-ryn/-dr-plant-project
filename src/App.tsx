@@ -61,7 +61,7 @@ export default function App() {
   };
 
   const analyze = async () => {
-    if (!image || !file) return;
+    if (!image || !file || isAnalyzing) return;
 
     setIsAnalyzing(true);
     setError(null);
@@ -212,13 +212,14 @@ export default function App() {
                   />
                 </div>
 
-                {!isAnalyzing && !result && !error && (
+                {!result && !error && (
                   <button
                     onClick={analyze}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-6 rounded-[32px] transition-all shadow-2xl shadow-green-200 active:scale-[0.98] flex items-center justify-center gap-4 text-xl group"
+                    disabled={isAnalyzing}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-6 rounded-[32px] transition-all shadow-2xl shadow-green-200 active:scale-[0.98] flex items-center justify-center gap-4 text-xl group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Leaf className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                    Start Expert Analysis
+                    {isAnalyzing ? "Analyzing..." : "Start Expert Analysis"}
                   </button>
                 )}
               </motion.div>
@@ -228,15 +229,24 @@ export default function App() {
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-8 bg-red-50 border border-red-100 rounded-[32px] flex items-start gap-5 text-red-700 shadow-sm"
+                className="p-8 bg-red-50 border border-red-100 rounded-[32px] flex flex-col gap-6 text-red-700 shadow-sm"
               >
-                <div className="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center shrink-0">
-                  <AlertCircle className="w-6 h-6" />
+                <div className="flex items-start gap-5">
+                  <div className="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center shrink-0">
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-black uppercase text-xs tracking-wider">Analysis Error</p>
+                    <p className="text-sm font-bold leading-relaxed">{error}</p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="font-black uppercase text-xs tracking-wider">Analysis Error</p>
-                  <p className="text-sm font-bold leading-relaxed">{error}</p>
-                </div>
+                <button 
+                  onClick={analyze}
+                  disabled={isAnalyzing}
+                  className="w-full py-4 bg-white border border-red-200 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isAnalyzing ? "Analyzing..." : "Try Again"}
+                </button>
               </motion.div>
             )}
           </div>

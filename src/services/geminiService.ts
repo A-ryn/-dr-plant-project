@@ -94,20 +94,28 @@ export async function analyzePlantImage(base64Image: string, mimeType: string, u
           responseMimeType: "application/json",
           responseSchema,
           maxOutputTokens: 2048, // Ensure enough space for detailed analysis
-          systemInstruction: "You are a Kerala-specific Agri-Tech expert. You specialize in identifying local plants and diseases. You focus on organic remedies and Kerala's unique climate (Laterite soil, high humidity, monsoon seasons). If an image is not a plant, you must strictly return the error field. Keep your responses concise and strictly follow the JSON schema.",
+          systemInstruction: "You are a Kerala-specific Agri-Tech expert. You specialize in identifying local plants and diseases. You focus on organic remedies and Kerala's unique climate (Laterite soil, high humidity, monsoon seasons). If an image is not a plant, you must strictly return the error field. Your response MUST be a single, valid JSON object and nothing else. Do not include any conversational text or markdown blocks.",
         }
       });
 
       let text = result.text;
       if (!text) throw new Error("No response from AI");
       
-      // Clean potential markdown or extra whitespace
-      text = text.replace(/```json\n?|```/g, "").trim();
+      // Robust JSON extraction: find the first '{' and the last '}'
+      const firstBrace = text.indexOf("{");
+      const lastBrace = text.lastIndexOf("}");
+      
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        text = text.substring(firstBrace, lastBrace + 1);
+      } else {
+        // Fallback to cleaning markdown if braces aren't found in a way we expect
+        text = text.replace(/```json\n?|```/g, "").trim();
+      }
       
       try {
         return JSON.parse(text) as PlantAnalysis;
       } catch (parseError) {
-        console.error("JSON Parse Error. Text snippet:", text.substring(0, 500) + "...");
+        console.error("JSON Parse Error. Raw text:", text);
         throw new Error("The AI response was malformed. Please try again.");
       }
     } catch (error: any) {
@@ -122,6 +130,13 @@ export async function analyzePlantImage(base64Image: string, mimeType: string, u
         console.warn(`Gemini API busy (503/429). Retrying in ${delay}ms... (Attempt ${retryCount}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
+      }
+
+      if (error?.message?.includes("429") || error?.message?.includes("quota")) {
+        throw new Error("Quota Exceeded: The AI service is currently at its limit. Please wait a minute and try again.");
+      }
+      if (error?.message?.includes("503") || error?.message?.includes("UNAVAILABLE")) {
+        throw new Error("Service Unavailable: The AI service is currently busy. Please try again in a few moments.");
       }
 
       console.error("Analysis error:", error);
