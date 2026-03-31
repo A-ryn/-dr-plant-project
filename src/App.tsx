@@ -34,6 +34,10 @@ export default function App() {
   };
 
   const processFile = (selectedFile: File) => {
+    if (selectedFile.size > 4 * 1024 * 1024) {
+      setError("File size too large. Please upload an image smaller than 4MB.");
+      return;
+    }
     setFile(selectedFile);
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -69,8 +73,8 @@ export default function App() {
       } else {
         setResult(analysis);
       }
-    } catch (err) {
-      setError("Failed to analyze image. Please try again.");
+    } catch (err: any) {
+      setError(err?.message || "Failed to analyze image. Please try again.");
       console.error(err);
     } finally {
       setIsAnalyzing(false);

@@ -20,6 +20,9 @@ export interface PlantAnalysis {
 }
 
 export async function analyzePlantImage(base64Image: string, mimeType: string, userMessage?: string): Promise<PlantAnalysis> {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("Gemini API key is missing. Please set GEMINI_API_KEY in your environment.");
+  }
   const model = "gemini-3-flash-preview";
   
   const prompt = `Perform a comprehensive analysis of this plant image.
