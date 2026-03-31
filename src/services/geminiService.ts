@@ -90,14 +90,23 @@ export async function analyzePlantImage(base64Image: string, mimeType: string, u
         config: {
           responseMimeType: "application/json",
           responseSchema,
-          systemInstruction: "You are a Kerala-specific Agri-Tech expert. You specialize in identifying local plants and diseases. You focus on organic remedies and Kerala's unique climate (Laterite soil, high humidity, monsoon seasons). If an image is not a plant, you must strictly return the error field.",
+          maxOutputTokens: 2048, // Ensure enough space for detailed analysis
+          systemInstruction: "You are a Kerala-specific Agri-Tech expert. You specialize in identifying local plants and diseases. You focus on organic remedies and Kerala's unique climate (Laterite soil, high humidity, monsoon seasons). If an image is not a plant, you must strictly return the error field. Keep your responses concise and strictly follow the JSON schema.",
         }
       });
 
-      const text = result.text;
+      let text = result.text;
       if (!text) throw new Error("No response from AI");
       
-      return JSON.parse(text) as PlantAnalysis;
+      // Clean potential markdown or extra whitespace
+      text = text.replace(/```json\n?|```/g, "").trim();
+      
+      try {
+        return JSON.parse(text) as PlantAnalysis;
+      } catch (parseError) {
+        console.error("JSON Parse Error. Text snippet:", text.substring(0, 500) + "...");
+        throw new Error("The AI response was malformed. Please try again.");
+      }
     } catch (error: any) {
       const isRetryable = error?.message?.includes("503") || 
                           error?.message?.includes("429") || 
