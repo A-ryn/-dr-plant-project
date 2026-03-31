@@ -23,7 +23,7 @@ export async function analyzePlantImage(base64Image: string, mimeType: string, u
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("Gemini API key is missing. Please set GEMINI_API_KEY in your environment.");
   }
-  const model = "gemini-3-flash-preview";
+  const model = "gemini-3.1-flash-lite-preview";
   
   const prompt = `Perform a comprehensive analysis of this plant image.
   1. IDENTIFICATION: Identify the plant species. If it's NOT a plant/leaf, return an error.
