@@ -17,7 +17,7 @@ DR PLANT makes expert agricultural knowledge accessible to everyone, promoting s
 
 ## Google AI Usage
 ### Tools / Models Used
-- **Model**: `gemini-3-flash-preview` (Gemini 3 Flash)
+- **Model**: `gemini-3.1-flash-lite-preview` (Gemini 3.1 Flash Lite)
 - **SDK**: `@google/genai`
 
 ### How Google AI Was Used
@@ -26,6 +26,7 @@ Google AI is the core engine of DR PLANT. It is integrated into the frontend to 
 2. **Contextual Reasoning**: Using a specialized system instruction, the AI acts as a "Kerala-specific Agri-Tech expert," interpreting the image data through the lens of local soil types (Laterite) and climate patterns.
 3. **Structured Data Generation**: The AI processes the image and user questions to return a strictly structured JSON response. This allows the application to render a dynamic, interactive dashboard with specific metrics for watering, fertilizers, and remedies.
 4. **Natural Language Consultation**: The AI answers specific user questions provided in the "Additional Context" field, integrating these answers directly into the final health report.
+5. **Robust Error Handling**: The application includes specialized logic to handle API quotas and service availability, ensuring a smooth user experience even during high demand.
 
 ## Proof of Google AI Usage
 Attach screenshots in a `/proof` folder:
